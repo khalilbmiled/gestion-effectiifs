@@ -1,5 +1,6 @@
 package com.bpi.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.UUID;
@@ -9,6 +10,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PersonneResponseDto {
     private UUID id;
     private String nom;

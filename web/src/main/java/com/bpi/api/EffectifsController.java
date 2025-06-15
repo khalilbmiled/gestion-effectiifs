@@ -4,6 +4,7 @@ import com.bpi.dto.EntrepriseRequestDto;
 import com.bpi.dto.EntrepriseResponseDto;
 import com.bpi.dto.PersonneRequestDto;
 import com.bpi.dto.PersonneResponseDto;
+import com.bpi.enums.TypeBeneficiaireInput;
 import com.bpi.enums.TypeBeneficiare;
 import com.bpi.exception.FunctionalException;
 import com.bpi.mapper.BeneficiaireMapper;
@@ -86,6 +87,9 @@ public class EffectifsController {
     @GetMapping(value = "/entreprise", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<List<EntrepriseResponseDto>> getEntreprise() {
         List<Entreprise> entreprises = effectifService.getEntreprises();
+        if(entreprises.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
         return new ResponseEntity<>(entreprises.stream().map(EntrepriseMapper::mapToEntrepriseResponseDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -94,7 +98,7 @@ public class EffectifsController {
             @ApiResponse(responseCode = "200", description = "Successful add beneficiaire", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))}),
             @ApiResponse(responseCode = "204", description = "Entreprise ou personne inexistante",
                     content = @Content(mediaType = "String", schema = @Schema(type = "string"))),
-            @ApiResponse(responseCode = "400", description = "Return Code 400 - The format of the request does not correspond on the expected",
+            @ApiResponse(responseCode = "404", description = "Return Code 404 - Not found",
                     content = @Content(mediaType = "String", schema = @Schema(type = "string"))),
     })
     @PostMapping(value = "/addBeneficiaire", produces = APPLICATION_JSON_VALUE)
@@ -108,8 +112,8 @@ public class EffectifsController {
             @Parameter(description = "l'identifiant de la personne physique / entreprise", required = true) final UUID idPersonnePhysique,
 
             @RequestHeader(value = "type")
-            @Schema(name = "IDPersonnePhysique" , description = "Le type de beneficiaire entreprise/personne physique")
-            @Parameter(description = "le type de beneficiaire", required = true) final TypeBeneficiare type
+            @Schema(name = "type" , description = "Le type de beneficiaire entreprise/personne physique")
+            @Parameter(description = "le type de beneficiaire (PP : Personne physique, EN : Entreprise)", required = true) final TypeBeneficiaireInput type
     ) {
         try {
             effectifService.addBeneficiaire(idEntreprise, idPersonnePhysique, String.valueOf(type));
@@ -117,7 +121,7 @@ public class EffectifsController {
         } catch (FunctionalException e) {
 
             HttpStatus status = HttpStatus.resolve(e.getErrorCode());
-            if (status == null || status == HttpStatus.NO_CONTENT) {
+            if (status == null) {
                 status = HttpStatus.BAD_REQUEST;
             }
 
@@ -127,7 +131,11 @@ public class EffectifsController {
 
     @Operation(summary = "Récupérer la liste des bénéficiaires")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful get beneficiaire", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))})
+            @ApiResponse(responseCode = "200", description = "Successful get beneficiaire", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))}),
+            @ApiResponse(responseCode = "204", description = "La liste des bénéficiaires est vide",
+                    content = @Content(mediaType = "String", schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "404", description = "Return Code 404 - Not found",
+                    content = @Content(mediaType = "String", schema = @Schema(type = "string"))),
     })
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBeneficiaireEffectifs(
@@ -137,17 +145,20 @@ public class EffectifsController {
 
             @RequestHeader(value = "type")
             @Schema(name = "type" , description = "Le type de beneficiaire entreprise/personne physique")
-            @Parameter(description = "le type de beneficiaire", required = true) final TypeBeneficiare type
+            @Parameter(description = "le type de beneficiaire (PP : Personne physique, EN : Entreprise, ALL : Entreprise + personne physique)", required = true) final TypeBeneficiare type
     ) {
         try {
             List<Beneficiaire> beneficiaires = effectifService.getBeneficiaireEffectifs(idEntreprise, String.valueOf(type));
+            if(beneficiaires.isEmpty()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
             return new ResponseEntity<>(beneficiaires.stream().map(BeneficiaireMapper::mapToBeneficiareResponseDto).collect(Collectors.toList()), HttpStatus.OK);
         } catch (FunctionalException e) {
             HttpStatus status = HttpStatus.resolve(e.getErrorCode());
-            if (status == null || status == HttpStatus.NO_CONTENT) {
+            if (status == null) {
                 status = HttpStatus.BAD_REQUEST;
             }
-            return ResponseEntity.status(status).body(e.getMessage());
+            return ResponseEntity.status(status).contentType(MediaType.TEXT_PLAIN).body(e.getMessage());
         }
     }
 }

@@ -54,7 +54,7 @@ public class EffectifServiceImpl implements IEffectifService{
         Optional<Entreprise> entrepriseOptional = listeEntreprises.stream().filter(entreprise -> entreprise.getId().equals(idEntreprise)).findFirst();
 
         if(entrepriseOptional.isEmpty()){
-            throw new FunctionalException(FunctionalErrorCode.BAD_REQUEST, ENTREPRISE_INEXISTANTE);
+            throw new FunctionalException(FunctionalErrorCode.NOT_FOUND, ENTREPRISE_INEXISTANTE);
         }
 
         Entreprise entreprise = entrepriseOptional.get();
@@ -62,14 +62,14 @@ public class EffectifServiceImpl implements IEffectifService{
         if(type.equals(PERSONNE_PHYSIQUE)) {
             Optional<PersonnePhysique> personnePhysique = listePersonnes.stream().filter(personne -> personne.getId().equals(idBeneficiaire)).findFirst();
             if(personnePhysique.isEmpty()){
-                throw new FunctionalException(FunctionalErrorCode.BAD_REQUEST, PERSONNE_INEXISTANTE);
+                throw new FunctionalException(FunctionalErrorCode.NOT_FOUND, PERSONNE_INEXISTANTE);
             }
             PersonnePhysique personne =  personnePhysique.get();
             entreprise.addBeneficiaire(personne);
         } else if (type.equals(ENTREPRISE)) {
             Optional<Entreprise> subEntrepriseOptional = listeEntreprises.stream().filter(e -> e.getId().equals(idBeneficiaire)).findFirst();
             if(subEntrepriseOptional.isEmpty()){
-                throw new FunctionalException(FunctionalErrorCode.BAD_REQUEST, ENTREPRISE_INEXISTANTE);
+                throw new FunctionalException(FunctionalErrorCode.NOT_FOUND, ENTREPRISE_INEXISTANTE);
             }
             Entreprise subEntreprise = subEntrepriseOptional.get();
             entreprise.addBeneficiaire(subEntreprise);
@@ -83,7 +83,7 @@ public class EffectifServiceImpl implements IEffectifService{
         Optional<Entreprise> entrepriseOptional = listeEntreprises.stream().filter(entreprise -> entreprise.getId().equals(idEntreprise)).findFirst();
 
         if(entrepriseOptional.isEmpty()){
-            throw new FunctionalException(FunctionalErrorCode.BAD_REQUEST, ENTREPRISE_INEXISTANTE);
+            throw new FunctionalException(FunctionalErrorCode.NOT_FOUND, ENTREPRISE_INEXISTANTE);
         }
 
         Entreprise entreprise = entrepriseOptional.get();

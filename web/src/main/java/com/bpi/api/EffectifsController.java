@@ -4,22 +4,27 @@ import com.bpi.dto.EntrepriseRequestDto;
 import com.bpi.dto.EntrepriseResponseDto;
 import com.bpi.dto.PersonneRequestDto;
 import com.bpi.dto.PersonneResponseDto;
+import com.bpi.enums.TypeBeneficiare;
+import com.bpi.exception.FunctionalException;
 import com.bpi.mapper.EntrepriseMapper;
 import com.bpi.mapper.PersonnePhysiqueMapper;
 import com.bpi.models.Entreprise;
 import com.bpi.models.PersonnePhysique;
 import com.bpi.services.IEffectifService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
@@ -80,5 +85,41 @@ public class EffectifsController {
     public ResponseEntity<List<EntrepriseResponseDto>> getEntreprise() {
         List<Entreprise> entreprises = effectifService.getEntreprises();
         return new ResponseEntity<>(entreprises.stream().map(EntrepriseMapper::mapToEntrepriseResponseDto).collect(Collectors.toList()), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Summary of add beneficiaire")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful add beneficiaire", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))}),
+            @ApiResponse(responseCode = "204", description = "Entreprise ou personne inexistante",
+                    content = @Content(mediaType = "String", schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "400", description = "Return Code 400 - The format of the request does not correspond on the expected",
+                    content = @Content(mediaType = "String", schema = @Schema(type = "string"))),
+    })
+    @PostMapping(value = "/addBeneficiaire", produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> addBeneficiaire(
+            @RequestHeader(value = "IDEntreprise")
+            @Schema(name = "IDEntreprise" , description = "L'id de l'entreprise pour laquelle on va rajouter une personne physique")
+            @Parameter(description = "l'identifiant de l'entreprise", required = true) final UUID idEntreprise,
+
+            @RequestHeader(value = "IDBeneficiaire")
+            @Schema(name = "IDBeneficiaire" , description = "L'id de la personne / enetreprise à rajouter dans une entreprise")
+            @Parameter(description = "l'identifiant de la personne physique / entreprise", required = true) final UUID idPersonnePhysique,
+
+            @RequestHeader(value = "type")
+            @Schema(name = "IDPersonnePhysique" , description = "Le type de beneficiaire entreprise/personne physique")
+            @Parameter(description = "le type de beneficiaire", required = true) final TypeBeneficiare type
+    ) {
+        try {
+            effectifService.addBeneficiaire(idEntreprise, idPersonnePhysique, String.valueOf(type));
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (FunctionalException e) {
+
+            HttpStatus status = HttpStatus.resolve(e.getErrorCode());
+            if (status == null || status == HttpStatus.NO_CONTENT) {
+                status = HttpStatus.BAD_REQUEST;
+            }
+
+            return ResponseEntity.status(status).contentType(MediaType.TEXT_PLAIN).body(e.getMessage());
+        }
     }
 }

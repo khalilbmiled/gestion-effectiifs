@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 @RestController
-@RequestMapping("/effectif")
+@RequestMapping("/effectifs")
 public class EffectifsController {
 
     private final IEffectifService effectifService;
@@ -69,5 +69,16 @@ public class EffectifsController {
     ) {
         Entreprise entreprise = effectifService.saveEntreprise(EntrepriseMapper.mapToEntrepriseRequest(entrepriseRequestDto));
         return new ResponseEntity<>(EntrepriseMapper.mapToEntrepriseResponseDto(entreprise), HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Récupérer la liste des entreprises")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful get entreprises", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))}),
+            @ApiResponse(responseCode = "204" , description = "No Content: list of entreprises is empty", content = {@Content(mediaType = "application/json")})
+    })
+    @GetMapping(value = "/entreprise", produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<EntrepriseResponseDto>> getEntreprise() {
+        List<Entreprise> entreprises = effectifService.getEntreprises();
+        return new ResponseEntity<>(entreprises.stream().map(EntrepriseMapper::mapToEntrepriseResponseDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 }

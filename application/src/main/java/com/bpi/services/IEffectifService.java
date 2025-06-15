@@ -16,6 +16,7 @@ public interface IEffectifService {
     List<PersonnePhysique> getPeronnePhysiques();
 
     Entreprise saveEntreprise(EntrepriseRequest entrepriseRequest);
+    List<Entreprise> getEntreprises();
 
 
 }

@@ -36,4 +36,9 @@ public class EffectifServiceImpl implements IEffectifService{
         return entreprise;
     }
 
+    @Override
+    public List<Entreprise> getEntreprises() {
+        return listeEntreprises;
+    }
+
 }

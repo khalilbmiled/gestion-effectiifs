@@ -1,8 +1,12 @@
 package com.bpi.api;
 
+import com.bpi.dto.EntrepriseRequestDto;
+import com.bpi.dto.EntrepriseResponseDto;
 import com.bpi.dto.PersonneRequestDto;
 import com.bpi.dto.PersonneResponseDto;
+import com.bpi.mapper.EntrepriseMapper;
 import com.bpi.mapper.PersonnePhysiqueMapper;
+import com.bpi.models.Entreprise;
 import com.bpi.models.PersonnePhysique;
 import com.bpi.services.IEffectifService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,8 +48,8 @@ public class EffectifsController {
 
     @Operation(summary = "Récupérer la liste des personnes physiques")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful get person", content = {@Content(mediaType = "application/json")}),
-            @ApiResponse(responseCode = "204", description = "No Content: list of person is empty", content = {@Content(mediaType = "application/json")})})
+            @ApiResponse(responseCode = "200", description = "Successful get personnes physiques", content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "204", description = "No Content: list of personne physique is empty", content = {@Content(mediaType = "application/json")})})
     @GetMapping(value = "/personne", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PersonneResponseDto>> getPersonne() {
         List<PersonnePhysique> listePersonnes = effectifService.getPeronnePhysiques();
@@ -53,5 +57,17 @@ public class EffectifsController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(listePersonnes.stream().map(PersonnePhysiqueMapper::mapToPersonneResponseDto).collect(Collectors.toList()), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Créer une nouvelle entreprise")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful save entreprise", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = EntrepriseResponseDto.class))})
+    })
+    @PostMapping(value = "/entreprise", produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<EntrepriseResponseDto> addEntreprise(
+            @RequestBody final EntrepriseRequestDto entrepriseRequestDto
+    ) {
+        Entreprise entreprise = effectifService.saveEntreprise(EntrepriseMapper.mapToEntrepriseRequest(entrepriseRequestDto));
+        return new ResponseEntity<>(EntrepriseMapper.mapToEntrepriseResponseDto(entreprise), HttpStatus.CREATED);
     }
 }

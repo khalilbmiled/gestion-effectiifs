@@ -1,5 +1,7 @@
 package com.bpi.services;
 
+import com.bpi.models.Entreprise;
+import com.bpi.models.EntrepriseRequest;
 import com.bpi.models.PersonnePhysique;
 import com.bpi.models.PersonnePhysiqueRequest;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,8 @@ import java.util.UUID;
 public class EffectifServiceImpl implements IEffectifService{
 
     private final List<PersonnePhysique> listePersonnes = new ArrayList<>();
+    private final List<Entreprise> listeEntreprises = new ArrayList<>();
+
 
     @Override
     public PersonnePhysique savePeronnePhysique(PersonnePhysiqueRequest personnePhysiqueRequest) {
@@ -23,6 +27,13 @@ public class EffectifServiceImpl implements IEffectifService{
     @Override
     public List<PersonnePhysique> getPeronnePhysiques() {
         return listePersonnes;
+    }
+
+    @Override
+    public Entreprise saveEntreprise(EntrepriseRequest entrepriseRequest) {
+        Entreprise entreprise = new Entreprise(UUID.randomUUID(), entrepriseRequest.getNom(), entrepriseRequest.getAdresse(), "EN");
+        listeEntreprises.add(entreprise);
+        return entreprise;
     }
 
 }

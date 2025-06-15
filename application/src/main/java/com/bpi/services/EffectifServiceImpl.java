@@ -2,10 +2,7 @@ package com.bpi.services;
 
 import com.bpi.exception.FunctionalErrorCode;
 import com.bpi.exception.FunctionalException;
-import com.bpi.models.Entreprise;
-import com.bpi.models.EntrepriseRequest;
-import com.bpi.models.PersonnePhysique;
-import com.bpi.models.PersonnePhysiqueRequest;
+import com.bpi.models.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -78,6 +75,22 @@ public class EffectifServiceImpl implements IEffectifService{
             entreprise.addBeneficiaire(subEntreprise);
         } else {
             throw new FunctionalException(FunctionalErrorCode.BAD_REQUEST, TYPE_INEXISTANT);
+        }
+    }
+
+    @Override
+    public List<Beneficiaire> getBeneficiaireEffectifs(UUID idEntreprise, String type) throws FunctionalException {
+        Optional<Entreprise> entrepriseOptional = listeEntreprises.stream().filter(entreprise -> entreprise.getId().equals(idEntreprise)).findFirst();
+
+        if(entrepriseOptional.isEmpty()){
+            throw new FunctionalException(FunctionalErrorCode.BAD_REQUEST, ENTREPRISE_INEXISTANTE);
+        }
+
+        Entreprise entreprise = entrepriseOptional.get();
+        if(type.equals("ALL")) {
+            return entreprise.getBeneficiaires();
+        } else {
+            return entreprise.getBeneficiaires().stream().filter(beneficiaire -> beneficiaire.getType().equals(type)).toList();
         }
     }
 

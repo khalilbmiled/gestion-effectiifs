@@ -6,8 +6,10 @@ import com.bpi.dto.PersonneRequestDto;
 import com.bpi.dto.PersonneResponseDto;
 import com.bpi.enums.TypeBeneficiare;
 import com.bpi.exception.FunctionalException;
+import com.bpi.mapper.BeneficiaireMapper;
 import com.bpi.mapper.EntrepriseMapper;
 import com.bpi.mapper.PersonnePhysiqueMapper;
+import com.bpi.models.Beneficiaire;
 import com.bpi.models.Entreprise;
 import com.bpi.models.PersonnePhysique;
 import com.bpi.services.IEffectifService;
@@ -87,7 +89,7 @@ public class EffectifsController {
         return new ResponseEntity<>(entreprises.stream().map(EntrepriseMapper::mapToEntrepriseResponseDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @Operation(summary = "Summary of add beneficiaire")
+    @Operation(summary = "Ajouter un bénéficiaire entreprise / personne physique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful add beneficiaire", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))}),
             @ApiResponse(responseCode = "204", description = "Entreprise ou personne inexistante",
@@ -120,6 +122,32 @@ public class EffectifsController {
             }
 
             return ResponseEntity.status(status).contentType(MediaType.TEXT_PLAIN).body(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Récupérer la liste des bénéficiaires")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful get beneficiaire", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Object.class))})
+    })
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getBeneficiaireEffectifs(
+            @RequestHeader(value = "IDEntreprise")
+            @Schema(name = "IDEntreprise" , description = "L'id de l'entreprise pour laquelle on va rajouter une personne physique")
+            @Parameter(description = "l'identifiant de l'entreprise", required = true) final UUID idEntreprise,
+
+            @RequestHeader(value = "type")
+            @Schema(name = "type" , description = "Le type de beneficiaire entreprise/personne physique")
+            @Parameter(description = "le type de beneficiaire", required = true) final TypeBeneficiare type
+    ) {
+        try {
+            List<Beneficiaire> beneficiaires = effectifService.getBeneficiaireEffectifs(idEntreprise, String.valueOf(type));
+            return new ResponseEntity<>(beneficiaires.stream().map(BeneficiaireMapper::mapToBeneficiareResponseDto).collect(Collectors.toList()), HttpStatus.OK);
+        } catch (FunctionalException e) {
+            HttpStatus status = HttpStatus.resolve(e.getErrorCode());
+            if (status == null || status == HttpStatus.NO_CONTENT) {
+                status = HttpStatus.BAD_REQUEST;
+            }
+            return ResponseEntity.status(status).body(e.getMessage());
         }
     }
 }

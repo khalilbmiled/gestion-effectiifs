@@ -1,6 +1,5 @@
 package com.bpi.dto;
 
-import com.bpi.models.Beneficiaire;
 import lombok.*;
 
 import java.util.List;
@@ -11,10 +10,10 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EntrepriseResponseDto {
+public class BeneficiareResponseDto {
     private UUID id;
     private String nom;
+    private String prenom;
     private String adresse;
-    private List<Beneficiaire> beneficiaires;
-
+    private List<BeneficiareResponseDto> beneficiares;
 }

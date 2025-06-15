@@ -1,10 +1,7 @@
 package com.bpi.services;
 
 import com.bpi.exception.FunctionalException;
-import com.bpi.models.Entreprise;
-import com.bpi.models.EntrepriseRequest;
-import com.bpi.models.PersonnePhysique;
-import com.bpi.models.PersonnePhysiqueRequest;
+import com.bpi.models.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,5 +18,6 @@ public interface IEffectifService {
     List<Entreprise> getEntreprises();
 
     void addBeneficiaire(UUID idEntreprise, UUID idBeneficiaire, String type) throws FunctionalException;
+    List<Beneficiaire> getBeneficiaireEffectifs(UUID idEntreprise, String type) throws FunctionalException;
 
 }

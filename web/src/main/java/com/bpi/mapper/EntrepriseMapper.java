@@ -21,6 +21,7 @@ public class EntrepriseMapper {
                 .id(entreprise.getId())
                 .nom(entreprise.getNom())
                 .adresse(entreprise.getAdresse())
+                .beneficiaires(entreprise.getBeneficiaires())
                 .build();
     }
 

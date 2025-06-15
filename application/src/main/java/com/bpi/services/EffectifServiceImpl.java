@@ -20,4 +20,9 @@ public class EffectifServiceImpl implements IEffectifService{
         return personnePhysique;
     }
 
+    @Override
+    public List<PersonnePhysique> getPeronnePhysiques() {
+        return listePersonnes;
+    }
+
 }
